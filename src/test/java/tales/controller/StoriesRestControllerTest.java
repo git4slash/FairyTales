@@ -16,6 +16,8 @@ import org.springframework.web.context.WebApplicationContext;
 import tales.Application;
 import tales.model.Account;
 import tales.model.AccountRepository;
+import tales.model.Story;
+import tales.model.StoryRepository;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -29,13 +31,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
- * Created by Slash on 22.09.2015
+ * Created by Slash on 22.09.2015.
  */
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 @WebAppConfiguration
-public class UsersRestControllerTest {
+public class StoriesRestControllerTest {
 
     private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
@@ -45,13 +46,17 @@ public class UsersRestControllerTest {
 
     private HttpMessageConverter mappingJackson2HttpMessageConverter;
 
-    private List<Account> accounts = new ArrayList<>();
+    private List<Story> stories = new ArrayList<>();
+    private List<Account> authors = new ArrayList<>();
 
     @Autowired
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private StoryRepository storyRepository;
+
+    @Autowired
+    private AccountRepository authrorsRepository;
 
     @Autowired
     void setConverters(HttpMessageConverter<?>[] converters) {
@@ -67,25 +72,35 @@ public class UsersRestControllerTest {
     public void setUp() throws Exception {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
 
-        this.accountRepository.deleteAllInBatch();
-        this.accounts.add(this.accountRepository.save(new Account("Alex", "father")));
-        this.accounts.add(this.accountRepository.save(new Account("Katya", "youngest daughter")));
-        this.accounts.add(this.accountRepository.save(new Account("Nastya", "daughter")));
-        accounts.forEach(System.out::println);
-        accountRepository.findAll().forEach(System.out::println);
+        this.authrorsRepository.deleteAllInBatch();
+
+        //creating authors
+        this.authors.add(this.authrorsRepository.save(new Account("Alex", "pass")));
+        this.authors.add(this.authrorsRepository.save(new Account("Vika", "pass")));
+
+        this.storyRepository.deleteAllInBatch();
+
+        // creating stories
+        this.stories.add(this.storyRepository.save(new Story("Story from Alex", "story text", this.authors.get(0))));
+        this.stories.add(this.storyRepository.save(new Story("Story2 from Alex", "story text", this.authors.get(0))));
+        this.stories.add(this.storyRepository.save(new Story("Story from Vika", "story text", this.authors.get(1))));
     }
 
     @Test
-    public void canFetchUsers() throws Exception {
-        mockMvc.perform(get("/users/"))
+    public void testReadAllStoryNames() throws Exception {
+        mockMvc.perform(get("/stories/"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$", hasSize(this.accounts.size())))
-                .andExpect(jsonPath("$[0].id", is(this.accounts.get(0).getId().intValue())))
-                .andExpect(jsonPath("$[0].username", is(this.accounts.get(0).getUsername())))
-                .andExpect(jsonPath("$[1].id", is(this.accounts.get(1).getId().intValue())))
-                .andExpect(jsonPath("$[1].username", is(this.accounts.get(1).getUsername())))
-                .andExpect(jsonPath("$[2].id", is(this.accounts.get(2).getId().intValue()+1)))
-                .andExpect(jsonPath("$[2].username", is(this.accounts.get(2).getUsername())));
+                .andExpect(jsonPath("$", hasSize(this.stories.size())))
+                .andExpect(jsonPath("$[0].id", is(this.stories.get(0).getId().intValue())))
+                .andExpect(jsonPath("$[0].storyName", is(this.stories.get(0).getStoryName())))
+                .andExpect(jsonPath("$[0].storyText", is(this.stories.get(0).getStoryText())))
+                .andExpect(jsonPath("$[1].id", is(this.stories.get(1).getId().intValue())))
+                .andExpect(jsonPath("$[1].storyName", is(this.stories.get(1).getStoryName())))
+                .andExpect(jsonPath("$[1].storyText", is(this.stories.get(1).getStoryText())))
+                .andExpect(jsonPath("$[2].id", is(this.stories.get(2).getId().intValue())))
+                .andExpect(jsonPath("$[2].storyName", is(this.stories.get(2).getStoryName())))
+                .andExpect(jsonPath("$[2].storyText", is(this.stories.get(2).getStoryText())))
+ ;
     }
 }
