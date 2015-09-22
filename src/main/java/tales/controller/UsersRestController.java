@@ -9,12 +9,12 @@ import tales.model.AccountRepository;
 import java.util.List;
 
 @RestController
-public class UsersController {
+public class UsersRestController {
 
     private final AccountRepository accountRepository;
 
     @Autowired
-    public UsersController(AccountRepository accountRepository) {
+    public UsersRestController(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
     }
 
