@@ -1,0 +1,5 @@
+    {
+    "id":1,
+    "storyName":"Story from Mathias",
+    "storyText":"Entertaining and enlightening text. \nHappy end.",
+    }
