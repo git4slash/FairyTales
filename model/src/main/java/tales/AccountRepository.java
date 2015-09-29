@@ -1,4 +1,5 @@
-package farytale.model;
+package tales;
+
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
