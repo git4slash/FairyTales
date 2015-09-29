@@ -267,7 +267,11 @@ crashlytics.properties
 crashlytics-build.properties
 
 # Target folder
+<<<<<<< HEAD
 .target/
 target/
 target/classes/data.sql
 *.class
+=======
+.target/
+>>>>>>> f8606436764a0d8c8675e689f2c91123241c1187
