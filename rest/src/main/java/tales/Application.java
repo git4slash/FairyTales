@@ -65,16 +65,16 @@ class TaleRestController {
 				.findByUsername(userId)
 				.map(account -> {
 					Tale result = TaleRepository.save(new Tale(account,
-							input.uri, input.text));
+							input.uri, input.text, input.name));
 
 					HttpHeaders httpHeaders = new HttpHeaders();
 					httpHeaders.setLocation(ServletUriComponentsBuilder
 							.fromCurrentRequest().path("/{id}")
 							.buildAndExpand(result.getId()).toUri());
-					return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
+        System.out.println(input.getName() + " Text: " + input.getText());
+        return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
 				}).get();
-
-	}
+    }
 
 	@RequestMapping(value = "/{taleId}", method = RequestMethod.GET)
 	Tale readTale(@PathVariable String userId, @PathVariable Long taleId) {
