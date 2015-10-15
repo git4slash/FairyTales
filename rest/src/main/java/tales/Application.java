@@ -85,7 +85,7 @@ class TaleRestController {
     }
 
 	@RequestMapping(method = RequestMethod.GET)
-	Collection<Tale> readTales(@PathVariable String userId) {
+	Collection<Tale> readUserTales(@PathVariable String userId) {
 		this.validateUser(userId);
 		return this.taleRepository.findByAccountUsername(userId);
 	}
