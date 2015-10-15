@@ -8,11 +8,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -54,44 +52,48 @@ public class Application {
 @RequestMapping("/{userId}/tales")
 class TaleRestController {
 
-	private final TaleRepository TaleRepository;
+	private final TaleRepository taleRepository;
 
 	private final AccountRepository accountRepository;
 
 	@RequestMapping(method = RequestMethod.POST)
-	ResponseEntity<?> add(@PathVariable String userId, @RequestBody Tale input) {
+	ResponseEntity<?> createNewTale(@PathVariable String userId, @RequestBody Tale input) {
 		this.validateUser(userId);
 		return this.accountRepository
 				.findByUsername(userId)
 				.map(account -> {
-					Tale result = TaleRepository.save(new Tale(account,
-							input.uri, input.text, input.name));
+					taleRepository.save(new Tale(account,
+                            input.uri, input.text, input.name));
 
-					HttpHeaders httpHeaders = new HttpHeaders();
-					httpHeaders.setLocation(ServletUriComponentsBuilder
-							.fromCurrentRequest().path("/{id}")
-							.buildAndExpand(result.getId()).toUri());
         System.out.println(input.getName() + " Text: " + input.getText());
-        return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
 				}).get();
     }
 
-	@RequestMapping(value = "/{taleId}", method = RequestMethod.GET)
-	Tale readTale(@PathVariable String userId, @PathVariable Long taleId) {
-		this.validateUser(userId);
-		return this.TaleRepository.findOne(taleId);
-	}
+    @RequestMapping(value = "/{taleId}", method = RequestMethod.DELETE)
+    ResponseEntity<?> deleteTale(@PathVariable String userId, @PathVariable Long taleId) {
+        this.validateUser(userId);
+        return this.accountRepository
+                .findByUsername(userId)
+                .map(account -> {
+                    taleRepository.delete(taleId);
+                    System.out.println("Tale id="+ taleId + " deleted by user "
+                            + accountRepository.findByUsername(userId).get().getUsername());
+
+                    return new ResponseEntity<>(HttpStatus.OK);
+                }).get();
+    }
 
 	@RequestMapping(method = RequestMethod.GET)
 	Collection<Tale> readTales(@PathVariable String userId) {
 		this.validateUser(userId);
-		return this.TaleRepository.findByAccountUsername(userId);
+		return this.taleRepository.findByAccountUsername(userId);
 	}
 
 	@Autowired
 	TaleRestController(TaleRepository TaleRepository,
 			AccountRepository accountRepository) {
-		this.TaleRepository = TaleRepository;
+		this.taleRepository = TaleRepository;
 		this.accountRepository = accountRepository;
 	}
 
