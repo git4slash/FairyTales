@@ -2,10 +2,7 @@ package tales;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,12 +19,12 @@ public class Account {
     public String username;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "account")
-    private Set<Tale> tales = new HashSet<>();
+    @ManyToMany(targetEntity = Tale.class)
+    private Set<Tale> subscribedTales = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "account")
-    public Set<TaleLink> taleLinks = new HashSet<>();
+    private Set<Tale> tales = new HashSet<>();
 
     public Account(String name, String password) {
         this.username = name;
@@ -35,6 +32,22 @@ public class Account {
     }
 
     Account() { // jpa only
+    }
+
+    public Set<Tale> getSubscribedTales() {
+        return subscribedTales;
+    }
+
+    public void setSubscribedTales(Set<Tale> subscribedTales) {
+        this.subscribedTales = subscribedTales;
+    }
+
+    public boolean unSubscribeFrom(Tale tale) {
+        return subscribedTales.remove(tale);
+    }
+
+    public boolean subscribeOn(Tale tale) {
+        return subscribedTales.add(tale);
     }
 
     public Set<Tale> getTales() {

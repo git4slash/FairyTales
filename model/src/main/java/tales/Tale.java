@@ -2,10 +2,9 @@ package tales;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Tale {
@@ -17,6 +16,10 @@ public class Tale {
     @Id
     @GeneratedValue
     private Long id;
+
+    @JsonIgnore
+    @ManyToMany(targetEntity = Account.class)
+    Set<Account> subscribers = new HashSet<>();
 
     public String uri;
     public String name;
@@ -35,6 +38,22 @@ public class Tale {
         this.uri = uri;
         this.name = taleName;
         this.text = taleText;
+    }
+
+    public Set<Account> getSubscribers() {
+        return subscribers;
+    }
+
+    public void setSubscribers(Set<Account> subscribers) {
+        this.subscribers = subscribers;
+    }
+
+    public boolean addSubscriber(Account subscriber) {
+        return subscribers.add(subscriber);
+    }
+
+    public boolean deleteSubscriber(Account subscriber) {
+        return subscribers.remove(subscriber);
     }
 
     public void setAccount(Account account) {
