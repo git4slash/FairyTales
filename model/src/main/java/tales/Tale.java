@@ -9,7 +9,7 @@ import java.util.Set;
 @Entity
 public class Tale {
 
-    @JsonIgnore
+//    @JsonIgnore
     @ManyToOne
     private Account account;
 

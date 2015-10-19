@@ -45,6 +45,7 @@ public class Application {
 
                             // subscribing on spam (acc is subscriber)
                             account.subscribeOn(spamTale);
+                            accountRepository.save(account);
                         });
 	}
 

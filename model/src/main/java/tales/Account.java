@@ -32,7 +32,7 @@ public class Account {
     }
 
     Account() { // jpa only
-    }
+        }
 
     public Set<Tale> getSubscribedTales() {
         return subscribedTales;

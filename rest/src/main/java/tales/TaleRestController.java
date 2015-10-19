@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/{userId}/tales")
@@ -23,8 +24,7 @@ public class TaleRestController {
                 .map(account -> {
                     taleRepository.save(new Tale(account,
                             input.uri, input.text, input.name));
-
-                    System.out.println(input.getName() + " Text: " + input.getText());
+                    System.out.printf("User %s posted new Tale id:%s, name:%s", userId, input.getId(), input.getName());
                     return new ResponseEntity<>(HttpStatus.CREATED);
                 }).get();
     }
@@ -32,21 +32,26 @@ public class TaleRestController {
     @RequestMapping(value = "/{taleId}", method = RequestMethod.DELETE)
     ResponseEntity<?> deleteTale(@PathVariable String userId, @PathVariable Long taleId) {
         this.validateUser(userId);
-        return this.accountRepository
-                .findByUsername(userId)
-                .map(account -> {
-                    taleRepository.delete(taleId);
-                    System.out.println("Tale id="+ taleId + " deleted by user "
-                            + accountRepository.findByUsername(userId).get().getUsername());
-
-                    return new ResponseEntity<>(HttpStatus.OK);
-                }).get();
+        Account account = accountRepository.findByUsername(userId).get();
+        Tale tale = taleRepository.findOne(taleId);
+        if (account.getId().equals(tale.getAccount().getId())) {
+            taleRepository.delete(taleId);
+            System.out.println("Tale id=" + taleId + " deleted by user " + userId);
+        } else {
+            account.unSubscribeFrom(tale);
+            accountRepository.saveAndFlush(account);
+            System.out.printf("User %s unsubscribed from Tale id:%s\n", userId, taleId);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    Collection<Tale> readUserTales(@PathVariable String userId) {
+    Collection<Tale> getAllTales(@PathVariable String userId) {
         this.validateUser(userId);
-        return this.taleRepository.findByAccountUsername(userId);
+        Set<Tale> tales = accountRepository.findByUsername(userId).get().getSubscribedTales();
+        tales.addAll(this.taleRepository.findByAccountUsername(userId));
+        System.out.printf("getAllTales request by:%s\n", userId);
+        return tales;
     }
 
     @Autowired
@@ -64,7 +69,6 @@ public class TaleRestController {
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 class UserNotFoundException extends RuntimeException {
-
     public UserNotFoundException(String userId) {
         super("could not find user '" + userId + "'.");
     }
